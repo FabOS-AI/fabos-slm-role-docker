@@ -1,0 +1,44 @@
+---
+- name: Get date of control node
+  set_fact:
+    date_and_time: "{{ lookup('pipe','date \"+%C%y-%m-%d %H:%M:%S\"') }}"
+
+- name: Assure date/time of target host aligns with control node
+  ansible.builtin.shell: "date -s \"{{ date_and_time }}\""
+  changed_when: false
+
+- name: Allow release-info change for APT repositories (required on older buster releases)
+  command: apt-get update -y --allow-releaseinfo-change
+  changed_when: false
+
+- name: Download Docker install convenience script.
+  ansible.builtin.get_url:
+    url: https://get.docker.com/
+    dest: /tmp/get-docker.sh
+    mode: 0775
+    validate_certs: no
+
+- name: Check if docker is installed
+  docker_host_info:
+  failed_when: false
+  register: docker_info
+
+- name: Set 'can_talk_to_docker'
+  set_fact:
+    can_talk_to_docker: "{{ docker_info.can_talk_to_docker | default(true) }}"
+
+- name: Run Docker install convenience script.
+  ansible.builtin.command: /tmp/get-docker.sh
+  environment:
+    CHANNEL: stable
+  when: not can_talk_to_docker
+  register: run_script_result
+  until: not run_script_result.rc == 100
+  retries: 5
+  delay: 3
+
+- name: Install pip packages
+  ansible.builtin.pip:
+    name:
+      - docker
+      - docker-compose

@@ -1,0 +1,8 @@
+---
+- name: Uninstall docker engine
+  ansible.builtin.yum:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: absent

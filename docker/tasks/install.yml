@@ -1,0 +1,18 @@
+---
+- name: Include CentOS Install Tasks
+  ansible.builtin.include_tasks: dist-specific/centos_install.yml
+  when: ansible_distribution == 'CentOS'
+
+- name: Include Ubuntu Install Tasks
+  ansible.builtin.include_tasks: dist-specific/ubuntu_install.yml
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Include Raspbian Install Tasks
+  ansible.builtin.include_tasks: dist-specific/raspbian_install.yml
+  when:
+    - ansible_distribution == 'Debian'
+    - ansible_lsb.id == 'Raspbian'
+
+- name: Expose TCP port
+  ansible.builtin.include_tasks: helper/add_config_for_expose_tcp_port.yml
+  when: expose_docker_tcp_port

@@ -1,0 +1,9 @@
+---
+# tasks file for docker
+- name: Install docker on target host
+  ansible.builtin.include_tasks: install.yml
+  when: state == "present"
+
+- name: Uninstall docker on target host
+  ansible.builtin.include_tasks: uninstall.yml
+  when: state == "absent"

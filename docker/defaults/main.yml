@@ -1,0 +1,4 @@
+---
+# defaults file for docker
+state: present
+expose_docker_tcp_port: false

@@ -1,0 +1,12 @@
+---
+- name: Install the yum-utils package
+  ansible.builtin.yum:
+    name: yum-utils
+
+- name: Run CentOS7-specific install part
+  when: ansible_distribution_major_version == "7"
+  ansible.builtin.include_tasks: dist-specific/centos_7_install.yml
+
+- name: Run CentOS8-specific install part
+  when: ansible_distribution_major_version == "8"
+  ansible.builtin.include_tasks: dist-specific/centos_8_install.yml

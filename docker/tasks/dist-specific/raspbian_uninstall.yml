@@ -1,0 +1,30 @@
+---
+- name: Remove apt packages
+  ansible.builtin.apt:
+    name:
+      - docker
+      - docker-ce
+      - docker-ce-cli
+      - docker-ce-rootless-extras
+      - docker-engine
+      - docker.io
+      - containerd
+      - containerd.io
+      - runc
+    state: absent
+  register: apt_remove_result
+  until: not apt_remove_result.failed
+  retries: 20
+  delay: 3
+
+- name: Assure install-convenience-script is deleted
+  ansible.builtin.file:
+    path: /tmp/get-docker.sh
+    state: absent
+
+- name: Remove pip packages
+  ansible.builtin.pip:
+    name:
+      - docker
+      - docker-compose
+    state: absent

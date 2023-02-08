@@ -2,3 +2,11 @@
 # defaults file for docker
 state: present
 expose_docker_tcp_port: false
+
+## Windows
+docker_desktop_download_url: https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe
+docker_desktop_download_dest_folder: C:\Users\ansible\Downloads\
+docker_desktop_download_dest_file: Docker-Desktop-Installer.exe
+docker_desktop_download_dest_full_path: "{{docker_desktop_download_dest_folder}}{{docker_desktop_download_dest_file}}"
+
+docker_desktop_service_name: "Docker Desktop Service"

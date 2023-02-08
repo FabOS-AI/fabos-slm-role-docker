@@ -13,6 +13,11 @@
     - ansible_distribution == 'Debian'
     - ansible_lsb.id == 'Raspbian'
 
+- name: Include Windows 10 Uninstall Tasks
+  ansible.builtin.include_tasks: dist-specific/win_10_uninstall.yml
+  when: ansible_os_family == "Windows"
+
 - name: Remove config files for exposing TCP port
   ansible.builtin.include_tasks: helper/remove_config_for_expose_tcp_port.yml
-  when: true
+  when:
+    - ansible_os_family != "Windows"

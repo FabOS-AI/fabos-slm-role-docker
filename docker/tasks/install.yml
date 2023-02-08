@@ -13,6 +13,10 @@
     - ansible_distribution == 'Debian'
     - ansible_lsb.id == 'Raspbian'
 
+- name: Include Windows 10 Install Tasks
+  ansible.builtin.include_tasks: dist-specific/win_10_install.yml
+  when: ansible_os_family == "Windows"
+
 - name: Expose TCP port
   ansible.builtin.include_tasks: helper/add_config_for_expose_tcp_port.yml
   when: expose_docker_tcp_port

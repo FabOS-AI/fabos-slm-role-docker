@@ -2,6 +2,14 @@
 # defaults file for docker
 state: present
 expose_docker_tcp_port: false
+expose_tcp_port:
+  files:
+    - src: daemon.json
+      dest_dir: /etc/docker/
+      dest_file: daemon.json
+    - src: override.conf
+      dest_dir: /etc/systemd/system/docker.service.d/
+      dest_file: override.conf
 
 ## Windows
 docker_desktop_download_url: https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe

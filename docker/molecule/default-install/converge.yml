@@ -1,0 +1,12 @@
+---
+- name: Converge - Install
+  hosts: all
+  gather_facts: yes
+  become: yes
+  vars:
+    ansible_become_method: runas
+    ansible_become_user: ansible
+  tasks:
+    - name: "Include docker - state = present"
+      ansible.builtin.include_role:
+        name: "docker"

@@ -1,0 +1,30 @@
+- name: Checking if Docker Windows Service is already configured
+  ansible.windows.win_service:
+    name: "{{ docker_desktop_service_name }}"
+  register: docker_service_info
+  ignore_errors: yes
+
+- name: Install Docker Desktop
+  when: docker_service_info.failed
+  block:
+  - name: Download Docker-Desktop Setup exe
+    ansible.windows.win_get_url:
+      url: "{{ docker_desktop_download_url }}"
+      dest: "{{ docker_desktop_download_dest_full_path }}"
+
+  - name: Run Docker-Desktop Setup Install
+    ansible.windows.win_command: "{{ docker_desktop_download_dest_file }} install --quiet --accept-license"
+    args:
+      chdir: "{{ docker_desktop_download_dest_folder }}"
+
+  - name: Start Docker Service
+    ansible.windows.win_service:
+      name: "Docker Desktop Service"
+      state: started
+
+- name: Add user to group 'docker-users'
+  ansible.windows.win_user:
+    name: ansible
+    groups: ['docker-users']
+    groups_action: add
+

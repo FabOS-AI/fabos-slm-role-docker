@@ -1,0 +1,24 @@
+#- name: Uninstall Docker-Desktop via chocolatey
+#  chocolatey.chocolatey.win_chocolatey:
+#    name: "docker-desktop"
+#    state: absent
+#    remove_dependencies: true
+
+- name: Checking if Docker Windows Service is already configured
+  ansible.windows.win_service:
+    name: "{{ docker_desktop_service_name }}"
+  register: docker_service_info
+  ignore_errors: yes
+
+- name: Uninstall Docker-Desktop
+  when: not docker_service_info.failed
+  block:
+  - name: Download Docker-Desktop Setup exe
+    ansible.windows.win_get_url:
+      url: "{{ docker_desktop_download_url }}"
+      dest: "{{ docker_desktop_download_dest_full_path }}"
+
+  - name: Run Docker-Desktop Setup Uninstall
+    ansible.windows.win_command: "{{ docker_desktop_download_dest_file }} uninstall --quiet"
+    args:
+      chdir: "{{ docker_desktop_download_dest_folder }}"

@@ -1,0 +1,17 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Do hello-world
+      ansible.builtin.command: docker run hello-world
+      become: yes
+      register: result
+      failed_when: false
+
+    - assert:
+        that:
+          - result.rc == 2
+

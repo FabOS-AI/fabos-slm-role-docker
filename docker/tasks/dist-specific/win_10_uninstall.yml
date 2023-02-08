@@ -11,7 +11,7 @@
   ignore_errors: yes
 
 - name: Uninstall Docker-Desktop
-  when: not docker_service_info.failed
+  when: docker_service_info.exists
   block:
   - name: Download Docker-Desktop Setup exe
     ansible.windows.win_get_url:

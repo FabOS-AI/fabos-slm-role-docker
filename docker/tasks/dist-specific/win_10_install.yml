@@ -5,7 +5,7 @@
   ignore_errors: yes
 
 - name: Install Docker Desktop
-  when: docker_service_info.failed
+  when: not docker_service_info.exists
   block:
   - name: Download Docker-Desktop Setup exe
     ansible.windows.win_get_url:

@@ -1,6 +1,17 @@
 ---
-- name: Converge - Uninstall
-  hosts: all
+- name: Converge - Uninstall (ssh)
+  hosts: ssh
+  gather_facts: yes
+  become: yes
+  vars:
+    state: absent
+  tasks:
+    - name: "Include docker - state = absent (no-Windows)"
+      ansible.builtin.include_role:
+        name: "docker"
+
+- name: Converge - Uninstall (winrm)
+  hosts: winrm
   gather_facts: yes
   become: yes
   vars:
@@ -8,12 +19,6 @@
     ansible_become_user: ansible
     state: absent
   tasks:
-    - name: "Include docker - state = absent (no-Windows)"
-      ansible.builtin.include_role:
-        name: "docker"
-      when: ansible_os_family != "Windows"
-
     - name: "Include docker - state = absent (Windows)"
       ansible.builtin.include_role:
         name: "docker"
-      when: ansible_os_family == "Windows"

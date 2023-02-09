@@ -1,22 +1,27 @@
 def scenarios = [
     "ubuntu2204": [
         "install-linux",
+        "install-tcp-linux",
         "uninstall-linux"
     ],
     "ubuntu2004": [
         "install-linux",
+        "install-tcp-linux",
         "uninstall-linux"
     ],
     "ubuntu1804": [
         "install-linux",
+        "install-tcp-linux",
         "uninstall-linux"
     ],
     "centos8": [
         "install-linux",
+        "install-tcp-linux",
         "uninstall-linux"
     ],
     "centos7": [
         "install-linux",
+        "install-tcp-linux",
         "uninstall-linux"
     ]
 ]

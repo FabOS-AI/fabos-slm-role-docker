@@ -1,8 +1,8 @@
 ---
 # This is an example playbook to execute Ansible tests.
 
-- name: Verify
-  hosts: all
+- name: Verify (ssh)
+  hosts: ssh
   gather_facts: yes
   tasks:
     - name: Do hello-world (no-Windows)
@@ -12,13 +12,19 @@
       retries: 5
       delay: 5
       until: result.rc == 0
-      when: ansible_os_family != "Windows"
 
+
+- name: Verify (winrm)
+  hosts: winrm
+  gather_facts: yes
+  vars:
+    ansible_become_method: runas
+    ansible_become_user: ansible
+  tasks:
     - name: Do hello-world (Windows)
       ansible.windows.win_shell: docker run hello-world
       register: result
       retries: 5
       delay: 5
       until: result.rc == 0
-      when: ansible_os_family == "Windows"
 

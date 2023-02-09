@@ -10,9 +10,11 @@
     src: "{{ item.src }}"
     dest: "{{ item.dest_dir }}{{ item.dest_file }}"
   loop: "{{ expose_tcp_port.files }}"
+  register: copy_action_results
 
 - name: Reload + Restart docker daemon
   ansible.builtin.systemd:
-      state: restarted
-      daemon_reload: yes
-      name: docker
+    state: restarted
+    daemon_reload: yes
+    name: docker
+  when: copy_action_results.changed

@@ -1,6 +1,15 @@
 ---
-- name: Converge - Install
-  hosts: all
+- name: Converge - Install (ssh)
+  hosts: ssh
+  gather_facts: yes
+  become: yes
+  tasks:
+    - name: "Include docker - state = present"
+      ansible.builtin.include_role:
+        name: "docker"
+
+- name: Converge - Install (winrm)
+  hosts: winrm
   gather_facts: yes
   become: yes
   vars:

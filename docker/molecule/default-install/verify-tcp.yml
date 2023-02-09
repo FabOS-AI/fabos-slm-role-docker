@@ -1,12 +1,15 @@
 ---
 # This is an example playbook to execute Ansible tests.
 - name: Verify (all)
-  hosts: all
+  hosts: localhost
   connection: local
+  gather_facts: no
   tasks:
     - name: Check TCP Port available
       ansible.builtin.wait_for:
+        host: "{{ item.value.ansible_host }}"
         port: 2375
+      loop: "{{ hostvars | dict2items}}"
 
 - name: Verify (ssh)
   hosts: ssh

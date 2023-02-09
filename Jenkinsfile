@@ -38,7 +38,7 @@ for (kv in mapToList(scenarios)) {
             }
 
             stage("${platform} - Create") {
-                sh "cd ./${role} && molecule create -s install -p ${platform}"
+                sh "cd ./${role} && molecule create -s install-${platform}"
             }
 
             for(int i = 0; i < scenarioList.size(); i++) {

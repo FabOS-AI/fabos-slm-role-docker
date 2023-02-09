@@ -1,4 +1,21 @@
 ---
+- name: Add firewall rule for port 2375
+  when: ansible_distribution == 'CentOS'
+  ansible.posix.firewalld:
+    port: 2375/tcp
+    permanent: true
+    state: enabled
+  register: firewalld_output
+
+- name: Reload Firewalld
+  when:
+    - ansible_distribution == 'CentOS'
+    - firewalld_output.changed
+  ansible.builtin.systemd:
+    name: firewalld
+    state: reloaded
+
+
 - name: Make sure directories of config files are created
   ansible.builtin.file:
     path: "{{ item.dest_dir }}"

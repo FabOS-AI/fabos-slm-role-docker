@@ -1,9 +1,3 @@
-- name: Checking if Docker Windows Service is already configured
-  ansible.windows.win_service:
-    name: "{{ docker_desktop_service_name }}"
-  register: docker_service_info
-  ignore_errors: yes
-
 - name: Setup WSL
   block:
     - name: Enable Windows Features - WSL, Container, Hyper-V

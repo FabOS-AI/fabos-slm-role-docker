@@ -28,3 +28,10 @@
       delay: 5
       until: result.rc == 0
 
+#    - name: Get Container Type (Linux / Windows)
+#      ansible.windows.win_command:
+#        cmd: "docker info --format {%raw%}{{.OSType}}{%endraw%}"
+#      register: docker_info_os_type
+#      failed_when: false
+#      changed_when: false
+

@@ -4,21 +4,29 @@
 #    state: absent
 #    remove_dependencies: true
 
-- name: Checking if Docker Windows Service is already configured
-  ansible.windows.win_service:
-    name: "{{ docker_desktop_service_name }}"
-  register: docker_service_info
-  ignore_errors: yes
+#- name: Checking if Docker Windows Service is already configured
+#  ansible.windows.win_service:
+#    name: "{{ docker_desktop_service_name }}"
+#  register: docker_service_info
+#  ignore_errors: yes
+#
+#- name: Uninstall Docker-Desktop
+#  when: docker_service_info.exists
+#  block:
+#  - name: Download Docker-Desktop Setup exe
+#    ansible.windows.win_get_url:
+#      url: "{{ docker_desktop_download_url }}"
+#      dest: "{{ docker_desktop_download_dest_full_path }}"
+#
+#  - name: Run Docker-Desktop Setup Uninstall
+#    ansible.windows.win_command: "{{ docker_desktop_download_dest_file }} uninstall --quiet"
+#    args:
+#      chdir: "{{ docker_desktop_download_dest_folder }}"
 
-- name: Uninstall Docker-Desktop
-  when: docker_service_info.exists
-  block:
-  - name: Download Docker-Desktop Setup exe
-    ansible.windows.win_get_url:
-      url: "{{ docker_desktop_download_url }}"
-      dest: "{{ docker_desktop_download_dest_full_path }}"
-
-  - name: Run Docker-Desktop Setup Uninstall
-    ansible.windows.win_command: "{{ docker_desktop_download_dest_file }} uninstall --quiet"
-    args:
-      chdir: "{{ docker_desktop_download_dest_folder }}"
+- name: Uninstall docker-desktop
+  ansible.windows.win_package:
+    path: "{{ docker_desktop_download_url }}"
+    arguments: uninstall --quiet
+    product_id: "{{ docker_desktop_product_id }}"
+    state: absent
+  timeout: 900

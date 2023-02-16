@@ -4,85 +4,66 @@
   register: docker_service_info
   ignore_errors: yes
 
-- name: Install Docker Desktop
-  when: not docker_service_info.exists
+- name: Setup WSL
   block:
-  - name: Enable Windows Features - WSL, Container, Hyper-V
-    ansible.windows.win_powershell:
-      script: 'Enable-WindowsOptionalFeature -Online -FeatureName $("Microsoft-Windows-Subsystem-Linux","Microsoft-Hyper-V", "Containers") -All'
+    - name: Enable Windows Features - WSL, Container, Hyper-V
+      ansible.windows.win_optional_feature:
+        name: "{{ item }}"
+        state: present
+        include_parent: true
+      loop: "{{ docker_desktop_windows_features }}"
+      register: install_win_features
 
-#  - name: Enable Windows Features - WSL, Container, Hyper-V
-#    ansible.windows.win_optional_feature:
-#      name:
-#        - Microsoft-Windows-Subsystem-Linux
-#        - Microsoft-Hyper-V
-#        - Containers
-#      state: present
+    - name: Reboot after activating Windows Features
+      when: install_win_features.changed
+      ansible.windows.win_reboot:
 
-#  - name: Check status of WSL
-#    ansible.windows.win_command:
-#      cmd: wsl --status
-#      output_encoding_override: utf-16
-#    register: wsl_status_cmd
-#    failed_when: false
-#    changed_when: false
-#
+    - name: Update wsl
+      ansible.windows.win_command:
+        cmd: wsl --update
+        output_encoding_override: utf-16
+      register: wsl_update_cmd
+      ignore_errors: true
+      changed_when: "'installiert' in wsl_update_cmd.stdout"
+      when: install_win_features.changed
 
-  - name: Reboot after activating Windows Features
-    ansible.windows.win_reboot:
+- name: Install docker-desktop
+  ansible.windows.win_package:
+    path: "{{ docker_desktop_download_url }}"
+    arguments: install --quiet --accept-license --backend=wsl-2 --admin-settings
+    product_id: "{{ docker_desktop_product_id }}"
+  register: install_docker_desktop
+  timeout: 900
 
-#  - name: Wait for WinRM port
-#    ansible.builtin.wait_for:
-#      host: "{{ ansible_host }}"
-#      port: "{{ ansible_port }}"
-##    delegate_to: localhost
+- name: Add user to group 'docker-users'
+  ansible.windows.win_user:
+    name: "{{ ansible_user }}"
+    groups: ['docker-users']
+    groups_action: add
 
-  - name: Update wsl
+- name: Reboot after Docker Desktop Install
+  when: install_docker_desktop.changed
+  ansible.windows.win_reboot:
+
+- name: Wait till Docker Desktop is available
+  when: install_docker_desktop.changed
+  ansible.windows.win_command: docker ps
+  register: docker_ps_cmd
+  until: docker_ps_cmd.rc == 0
+  retries: 30
+  delay: 2
+  changed_when: false
+
+- name: Set Container Type
+  block:
+  - name: Get Container Type (Linux / Windows)
     ansible.windows.win_command:
-      cmd: wsl --update
-      output_encoding_override: utf-16
-    register: wsl_update_cmd
-    ignore_errors: true
-    changed_when: "'installiert' in wsl_update_cmd.stdout"
-
-  - name: Install docker-desktop
-    ansible.windows.win_package:
-      path: "{{ docker_desktop_download_url }}"
-      arguments: install --quiet --accept-license --backend=wsl-2 --admin-settings
-      product_id: "{{ docker_desktop_product_id }}"
-
-#  - name: Download Docker-Desktop Setup exe
-#    ansible.windows.win_get_url:
-#      url: "{{ docker_desktop_download_url }}"
-#      dest: "{{ docker_desktop_download_dest_full_path }}"
-#
-#  - name: Run Docker-Desktop Setup Install
-#    ansible.windows.win_command: "{{ docker_desktop_download_dest_file }} install --quiet --accept-license --backend=wsl-2 --admin-settings"
-#    args:
-#      chdir: "{{ docker_desktop_download_dest_folder }}"
-#    timeout: 600
-
-#  - name: Start Docker Service
-#    ansible.windows.win_service:
-#      name: "Docker Desktop Service"
-#      state: started
-
-  - name: Add user to group 'docker-users'
-    ansible.windows.win_user:
-      name: "{{ ansible_user }}"
-      groups: ['docker-users']
-      groups_action: add
-
-  - name: Reboot after Docker Desktop Install
-    ansible.windows.win_reboot:
-
-  - name: Wait till Docker Desktop is available
-    ansible.windows.win_command: docker ps
-    register: docker_ps_cmd
-    until: docker_ps_cmd.rc == 0
-    retries: 30
-    delay: 2
+      cmd: "docker info --format {%raw%}{{.OSType}}{%endraw%}"
+    register: docker_info_os_type
+    failed_when: false
+    changed_when: false
 
   - name: Switch to Windows Containers
+    when: "'windows' not in docker_info_os_type.stdout_lines"
     ansible.windows.win_command:
       cmd: '"C:\\Program Files\\Docker\\Docker\\DockerCli.exe" -SwitchWindowsEngine'

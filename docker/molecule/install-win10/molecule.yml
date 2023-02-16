@@ -14,9 +14,7 @@ provisioner:
   name: ansible
   playbooks:
     create: ../default/create.yml
-#    create: ../default/create_win.yml
     destroy: ../default/destroy.yml
-#    destroy: ../default/destroy_win.yml
     converge: ../default-install/converge.yml
     verify: ../default-install/verify.yml
 verifier:

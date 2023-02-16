@@ -77,6 +77,7 @@ node {
         } finally {
             stage("Destroy") {
                 sh "cd ./${role} && molecule destroy -s install-linux"
+                sd "cd ./${role} && molecule destroy -s install-win10"
             }
         }
     }

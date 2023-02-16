@@ -12,11 +12,15 @@
 
 - name: Converge - Uninstall (winrm)
   hosts: winrm
+  connection: psrp
   gather_facts: yes
   become: yes
   vars:
+    ansible_port: 5985
+    ansible_winrm_transport: basic
     ansible_become_method: runas
     ansible_become_user: ansible
+    ansible_winrm_server_cert_validation: ignore
     state: absent
   tasks:
     - name: "Include docker - state = absent (Windows)"

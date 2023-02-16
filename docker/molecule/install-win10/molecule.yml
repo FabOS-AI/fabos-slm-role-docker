@@ -5,19 +5,18 @@ driver:
   name: delegated
 platforms:
   - name: win10
-    instance: win10
-    address: ${WIN10_ADDRESS}
-    user: ${WIN10_USER}
-    password: ${WIN10_PASSWORD}
-    port: "5985"
-    connection: "winrm"
-    winrm_transport: "basic"
-
+    template_name: windows-10
+    groups: ["winrm"]
+    vm_num_cpus: 4
+    vm_num_cpu_cores_per_socket: 2
+    vm_memory_mb: 8192
 provisioner:
   name: ansible
   playbooks:
-    create: ../default/create_win.yml
-    destroy: ../default/destroy_win.yml
+    create: ../default/create.yml
+#    create: ../default/create_win.yml
+    destroy: ../default/destroy.yml
+#    destroy: ../default/destroy_win.yml
     converge: ../default-install/converge.yml
     verify: ../default-install/verify.yml
 verifier:

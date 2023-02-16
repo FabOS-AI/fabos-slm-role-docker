@@ -7,12 +7,15 @@ platforms:
   - name: win10
     template_name: windows-10
     groups: ["winrm"]
+    vm_num_cpus: 4
+    vm_num_cpu_cores_per_socket: 2
+    vm_memory_mb: 8192
 provisioner:
   name: ansible
   playbooks:
     create: ../default/create.yml
     prepare: ../default-install/converge.yml
-    destroy: ../default/destroy_win.yml
+    destroy: ../default/destroy.yml
     converge: ../default-uninstall/converge.yml
     verify: ../default-uninstall/verify.yml
 verifier:

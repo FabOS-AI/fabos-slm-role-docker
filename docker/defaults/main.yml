@@ -19,3 +19,7 @@ docker_desktop_download_dest_full_path: "{{docker_desktop_download_dest_folder}}
 
 docker_desktop_product_id: "Docker Desktop" # For more information see: https://docs.ansible.com/ansible/latest/collections/ansible/windows/win_package_module.html#parameter-provider
 docker_desktop_service_name: "Docker Desktop Service"
+docker_desktop_windows_features:
+  - Microsoft-Windows-Subsystem-Linux
+  - Microsoft-Hyper-V
+  - Containers

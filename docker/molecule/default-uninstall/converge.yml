@@ -21,6 +21,8 @@
     ansible_become_method: runas
     ansible_become_user: ansible
     ansible_winrm_server_cert_validation: ignore
+    ansible_psrp_connection_timeout: 60
+    ansible_psrp_reconnection_retries: 5
     state: absent
   tasks:
     - name: "Include docker - state = absent (Windows)"

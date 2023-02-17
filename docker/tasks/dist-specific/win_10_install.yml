@@ -1,3 +1,16 @@
+#- name: Stop Process 'Docker Desktop'
+#  ansible.windows.win_shell: 'Stop-Process -name "Docker Desktop"'
+#  changed_when:
+#    - stop_process_cmd.stdout_lines | length == 0
+#    - stop_process_cmd.stderr_lines | length == 0
+#  failed_when: false
+#  register: stop_process_cmd
+#
+#- name: Start Docker Desktop
+#  ansible.windows.win_powershell:
+#    script: |
+#      Start-Process -FilePath "C:\Program Files\Docker\Docker\resources\dockerd.exe"
+
 - name: Setup WSL
   block:
     - name: Enable Windows Features - WSL, Container, Hyper-V
@@ -11,6 +24,7 @@
     - name: Reboot after activating Windows Features
       when: install_win_features.changed
       ansible.windows.win_reboot:
+        post_reboot_delay: 30
 
     - name: Update wsl
       ansible.windows.win_command:
@@ -39,12 +53,29 @@
   ansible.builtin.include_tasks: helper/add_config_for_expose_tcp_port_win.yml
   when: expose_docker_tcp_port
 
-- name: Reboot after Docker Desktop Install
-  when: install_docker_desktop.changed
+- name: Reboot after Docker Desktop Install / TCP Expose
+  when: install_docker_desktop.changed or copy_config_file_cmd.changed | default(false)
   ansible.windows.win_reboot:
 
+#- name: (Re)Start Docker Desktop
+#  when:
+#    - not install_docker_desktop.changed
+#    - copy_config_file_cmd.changed | default(false)
+#  block:
+#  - name: Stop Process 'Docker Desktop'
+#    ansible.windows.win_shell: 'Stop-Process -name "Docker Desktop"'
+#    changed_when:
+#      - stop_process_cmd.stdout_lines | length == 0
+#      - stop_process_cmd.stderr_lines | length == 0
+#    failed_when: false
+#    register: stop_process_cmd
+#
+#  - name: Start Docker Desktop
+#    ansible.windows.win_powershell:
+#      script: |
+#        Start-Process -FilePath "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+
 - name: Wait till Docker Desktop is available
-  when: install_docker_desktop.changed
   ansible.windows.win_command: docker ps
   register: docker_ps_cmd
   until: docker_ps_cmd.rc == 0

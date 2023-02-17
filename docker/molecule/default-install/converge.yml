@@ -20,13 +20,6 @@
     ansible_become_user: ansible
     ansible_winrm_server_cert_validation: ignore
   tasks:
-#    - name: Gather facts
-#      ansible.builtin.setup:
-#        gather_subset:
-#          - machine
-#          - lsb
-#          - kernel
-
     - name: "Include docker - state = present"
       ansible.builtin.include_role:
         name: "docker"

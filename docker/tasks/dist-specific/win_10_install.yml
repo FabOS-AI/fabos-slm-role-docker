@@ -35,6 +35,10 @@
     groups: ['docker-users']
     groups_action: add
 
+- name: Expose TCP Port
+  ansible.builtin.include_tasks: helper/add_config_for_expose_tcp_port_win.yml
+  when: expose_docker_tcp_port
+
 - name: Reboot after Docker Desktop Install
   when: install_docker_desktop.changed
   ansible.windows.win_reboot:

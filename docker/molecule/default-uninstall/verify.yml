@@ -25,7 +25,7 @@
     ansible_become_user: ansible
     ansible_winrm_server_cert_validation: ignore
     ansible_psrp_connection_timeout: 60
-    ansible_psrp_reconnection_retries: 5
+    ansible_psrp_reconnection_retries: 10
   gather_facts: false
   become: yes
   tasks:

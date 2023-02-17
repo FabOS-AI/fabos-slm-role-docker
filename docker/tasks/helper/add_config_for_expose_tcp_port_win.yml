@@ -18,3 +18,4 @@
   ansible.windows.win_copy:
     src: windows-daemon.json
     dest: "{{ docker_desktop_windows_daemon_config_full_path }}"
+  register: copy_config_file_cmd

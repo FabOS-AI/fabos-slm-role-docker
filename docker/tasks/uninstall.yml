@@ -17,7 +17,12 @@
   ansible.builtin.include_tasks: dist-specific/win_10_uninstall.yml
   when: ansible_os_family == "Windows"
 
-- name: Remove config files for exposing TCP port
+- name: Remove config files for exposing TCP port (Linux)
   ansible.builtin.include_tasks: helper/remove_config_for_expose_tcp_port.yml
   when:
     - ansible_os_family != "Windows"
+
+- name: Remove config files for exposing TCP port (Windows)
+  ansible.builtin.include_tasks: helper/remove_config_for_expose_tcp_port_win.yml
+  when:
+    - ansible_os_family == "Windows"

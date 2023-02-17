@@ -19,4 +19,6 @@
 
 - name: Expose TCP port
   ansible.builtin.include_tasks: helper/add_config_for_expose_tcp_port.yml
-  when: expose_docker_tcp_port
+  when:
+    - expose_docker_tcp_port
+    - ansible_os_family != "Windows"

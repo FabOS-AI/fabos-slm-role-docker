@@ -26,6 +26,7 @@ def scenarios = [
     ],
     "win10": [
         "install-win10",
+        "install-tcp-win10",
         "uninstall-win10"
     ]
 ]

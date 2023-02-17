@@ -23,3 +23,7 @@ docker_desktop_windows_features:
   - Microsoft-Windows-Subsystem-Linux
   - Microsoft-Hyper-V
   - Containers
+docker_desktop_windows_daemon_config_path: "C:\\Users\\{{ ansible_user }}\\.docker"
+docker_desktop_windows_daemon_config_file: "windows-daemon.json"
+docker_desktop_windows_daemon_config_full_path: "{{ docker_desktop_windows_daemon_config_path }}\\{{ docker_desktop_windows_daemon_config_file }}"
+docker_desktop_firewall_rule_name: Docker Daemon TCP Port

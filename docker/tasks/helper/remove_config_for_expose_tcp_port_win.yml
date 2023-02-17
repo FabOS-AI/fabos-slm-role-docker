@@ -1,0 +1,10 @@
+---
+- name: Remove firewall rule for port 2375
+  community.windows.win_firewall_rule:
+    name: "{{ docker_desktop_firewall_rule_name }}"
+    state: absent
+
+- name: Remove windows-daemon.json
+  ansible.windows.win_file:
+    path: "{{ docker_desktop_windows_daemon_config_full_path }}"
+    state: absent

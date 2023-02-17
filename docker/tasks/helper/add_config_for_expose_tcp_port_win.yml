@@ -1,0 +1,20 @@
+---
+- name: Add firewall rule for port 2375
+  community.windows.win_firewall_rule:
+    name: "{{ docker_desktop_firewall_rule_name }}"
+    localport: 2375
+    action: allow
+    direction: in
+    protocol: tcp
+    state: present
+    enabled: yes
+
+- name: Create .docker folder
+  ansible.windows.win_file:
+    path: "{{ docker_desktop_windows_daemon_config_path }}"
+    state: directory
+
+- name: Copy windows-daemon.json
+  ansible.windows.win_copy:
+    src: windows-daemon.json
+    dest: "{{ docker_desktop_windows_daemon_config_full_path }}"

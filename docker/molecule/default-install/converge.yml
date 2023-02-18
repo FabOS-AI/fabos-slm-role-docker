@@ -14,9 +14,10 @@
   gather_facts: no
   become: yes
   vars:
+    ansible_pipelining: false
     ansible_port: 5985
     ansible_winrm_transport: basic
-    ansible_winrm_read_timeout_sec: 120
+    ansible_winrm_read_timeout_sec: 160
     ansible_winrm_operation_timeout_sec: 90
     ansible_become_method: runas
     ansible_become_user: ansible

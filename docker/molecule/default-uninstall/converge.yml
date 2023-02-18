@@ -23,6 +23,7 @@
     ansible_winrm_server_cert_validation: ignore
     ansible_psrp_connection_timeout: 120
     ansible_psrp_operation_timeout: 90
+    ansible_psrp_read_timeout: 120
     ansible_psrp_reconnection_retries: 10
     state: absent
   tasks:

@@ -53,7 +53,7 @@ for (kv in mapToList(scenarios)) {
             for(int i = 0; i < scenarioList.size(); i++) {
                 def scenario = scenarioList[i]
                 stage("${platform} - ${scenario}") {
-                    sh "cd ./${role} && molecule test -s ${scenario} -p ${platform} --destroy never"
+                    sh "cd ./${role} && molecule -vvvv test -s ${scenario} -p ${platform} --destroy never"
                 }
             }
         }

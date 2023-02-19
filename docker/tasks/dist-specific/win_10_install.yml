@@ -24,7 +24,11 @@
     - name: Reboot after activating Windows Features
       when: install_win_features.changed
       ansible.windows.win_reboot:
-        post_reboot_delay: 30
+        post_reboot_delay: 60
+
+#    - name: "Wait till port {{ ansible_port }} available"
+#      ansible.windows.win_wait_for:
+#        port: "{{ ansible_port }}"
 
     - name: Get Version of wsl
       ansible.windows.win_command:
@@ -43,13 +47,40 @@
       changed_when: "'installiert' in wsl_update_cmd.stdout"
       when: "not 'WSL-Version' in wsl_version_cmd.stdout_lines"
 
+- name: Get status of Docker Desktop Service
+  ansible.windows.win_service:
+    name: "Docker Desktop Service"
+  register: docker_desktop_service_info
+
 - name: Install docker-desktop
+  when: not docker_desktop_service_info.exists
   ansible.windows.win_package:
     path: "{{ docker_desktop_download_url }}"
     arguments: install --quiet --accept-license --backend=wsl-2 --admin-settings
     product_id: "{{ docker_desktop_product_id }}"
+#  async: 600
+#  poll: 0
   register: install_docker_desktop
-  timeout: 900
+
+#- name: Wait till Installer is finished
+#  when: not docker_desktop_service_info.exists
+#  block:
+#    - name: Wait for Docker Desktop Installer to start
+#      community.windows.win_wait_for_process:
+#        process_name_exact: "Docker%20Desktop%20Installer"
+#        state: present
+#        timeout: 600
+#
+#    - name: Wait for Docker Desktop Installer to finish
+#      community.windows.win_wait_for_process:
+#        process_name_exact: "Docker%20Desktop%20Installer"
+#        state: absent
+#        timeout: 600
+#
+#    - name: Cleanup Ansible Async Job
+#      ansible.builtin.async_status:
+#        jid: '{{ install_docker_desktop.ansible_job_id }}'
+#        mode: cleanup
 
 - name: Add user to group 'docker-users'
   ansible.windows.win_user:
@@ -61,9 +92,16 @@
   ansible.builtin.include_tasks: helper/add_config_for_expose_tcp_port_win.yml
   when: expose_docker_tcp_port
 
-- name: Reboot after Docker Desktop Install / TCP Expose
-  when: install_docker_desktop.changed or copy_config_file_cmd.changed | default(false)
-  ansible.windows.win_reboot:
+- name: Do reboot
+  when: not docker_desktop_service_info.exists or copy_config_file_cmd.changed | default(false)
+  block:
+    - name: Reboot after Docker Desktop Install / TCP Expose
+      ansible.windows.win_reboot:
+        post_reboot_delay: 60
+
+#    - name: "Wait till port {{ ansible_port }} available"
+#      ansible.windows.win_wait_for:
+#        port: "{{ ansible_port }}"
 
 #- name: (Re)Start Docker Desktop
 #  when:

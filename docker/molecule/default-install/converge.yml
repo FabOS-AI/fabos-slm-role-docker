@@ -17,18 +17,18 @@
     ansible_pipelining: false
     ansible_port: 5985
     ansible_winrm_transport: basic
-    ansible_winrm_read_timeout_sec: 160
-    ansible_winrm_operation_timeout_sec: 90
+    ansible_winrm_read_timeout_sec: 240
+    ansible_winrm_operation_timeout_sec: 120
     ansible_become_method: runas
     ansible_become_user: ansible
     ansible_winrm_server_cert_validation: ignore
     ansible_psrp_connection_timeout: 120
-    ansible_psrp_operation_timeout: 90
-    ansible_psrp_read_timeout: 120
+    ansible_psrp_operation_timeout: 120
+    ansible_psrp_read_timeout: 240
     ansible_psrp_reconnection_retries: 10
   tasks:
     - name: Gathering Facts
-      ansible.builtin.setup:
+      ansible.windows.setup:
         gather_subset:
           - "!all"
 

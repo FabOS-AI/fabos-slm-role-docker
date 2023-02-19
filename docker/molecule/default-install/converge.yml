@@ -10,32 +10,62 @@
 
 - name: Converge - Install (winrm)
   hosts: winrm
-  connection: psrp
-  gather_facts: no
+  gather_facts: yes
   become: yes
   vars:
-    ansible_pipelining: false
     ansible_port: 5985
     ansible_winrm_transport: basic
-    ansible_winrm_read_timeout_sec: 300
+    ansible_winrm_read_timeout_sec: 120
     ansible_winrm_operation_timeout_sec: 120
     ansible_become_method: runas
     ansible_become_user: ansible
     ansible_winrm_server_cert_validation: ignore
-    ansible_psrp_connection_timeout: 120
+    ansible_psrp_connection_timeout: 90
     ansible_psrp_operation_timeout: 120
-    ansible_psrp_read_timeout: 300
+    ansible_psrp_read_timeout: 160
     ansible_psrp_reconnection_retries: 10
   tasks:
-    - name: Pause 60 seconds
-      ansible.windows.win_wait_for:
-        timeout: 60
+    - name: Install OpenSSH
+      win_chocolatey:
+        name: openssh
+        package_params: /SSHServerFeature
+        state: present
 
-    - name: Gathering Facts
-      ansible.windows.setup:
-        gather_subset:
-          - "!all"
+    - name: set the default shell to PowerShell
+      win_regedit:
+        path: HKLM:\SOFTWARE\OpenSSH
+        name: DefaultShell
+        data: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+        type: string
+        state: present
 
+#    - name: Pause 15 seconds
+#      ansible.windows.win_wait_for:
+#        timeout: 15
+#
+#    - name: Gathering Facts
+#      ansible.windows.setup:
+#        gather_subset:
+#          - "!all"
+#
+#    - name: "Include docker - state = present"
+#      ansible.builtin.include_role:
+#        name: "docker"
+
+- name: Converge - Install (winrm via ssh)
+  hosts: winrm
+  connection: ssh
+  gather_facts: yes
+  become: yes
+  vars:
+    ansible_connection: ssh
+    ansible_shell_type: powershell
+    ansible_become_method: runas
+    ansible_port: 22
+    ansible_ssh_user: ansible
+    ansible_ssh_password: password
+    ansible_become_user: ansible
+  tasks:
     - name: "Include docker - state = present"
       ansible.builtin.include_role:
         name: "docker"

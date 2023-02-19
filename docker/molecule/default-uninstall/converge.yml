@@ -12,7 +12,6 @@
 
 - name: Converge - Uninstall (winrm)
   hosts: winrm
-  connection: psrp
   gather_facts: yes
   become: yes
   vars:
@@ -28,6 +27,35 @@
     ansible_psrp_read_timeout: 120
     ansible_psrp_reconnection_retries: 10
     state: absent
+  tasks:
+    - name: Install OpenSSH
+      win_chocolatey:
+        name: openssh
+        package_params: /SSHServerFeature
+        state: present
+
+    - name: set the default shell to PowerShell
+      win_regedit:
+        path: HKLM:\SOFTWARE\OpenSSH
+        name: DefaultShell
+        data: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+        type: string
+        state: present
+
+
+- name: Converge - Uninstall (winrm via ssh)
+  hosts: winrm
+  connection: ssh
+  gather_facts: yes
+  become: yes
+  vars:
+    ansible_connection: ssh
+    ansible_shell_type: powershell
+    ansible_become_method: runas
+    ansible_port: 22
+    ansible_ssh_user: ansible
+    ansible_ssh_password: password
+    ansible_become_user: ansible
   tasks:
     - name: "Include docker - state = absent (Windows)"
       ansible.builtin.include_role:

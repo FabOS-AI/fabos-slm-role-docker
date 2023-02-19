@@ -26,6 +26,14 @@
       ansible.windows.win_reboot:
         post_reboot_delay: 30
 
+    - name: Get Version of wsl
+      ansible.windows.win_command:
+        cmd: wsl --version
+        output_encoding_override: utf-16
+      changed_when: false
+      failed_when: false
+      register: wsl_version_cmd
+
     - name: Update wsl
       ansible.windows.win_command:
         cmd: wsl --update
@@ -33,7 +41,7 @@
       register: wsl_update_cmd
       ignore_errors: true
       changed_when: "'installiert' in wsl_update_cmd.stdout"
-      when: install_win_features.changed
+      when: "not 'WSL-Version' in wsl_version_cmd.stdout_lines"
 
 - name: Install docker-desktop
   ansible.windows.win_package:

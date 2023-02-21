@@ -17,5 +17,9 @@ provisioner:
     destroy: ../default/destroy.yml
     converge: ../default-install/converge.yml
     verify: ../default-install/verify.yml
+  inventory:
+    group_vars:
+      winrm:
+        ansible_psrp_reconnection_retries: 10
 verifier:
   name: ansible

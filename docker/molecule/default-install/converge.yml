@@ -55,7 +55,7 @@
     ansible_ssh_password: password
     ansible_ssh_common_args: '-o ServerAliveInterval=10'
     ansible_become_user: ansible
-    reboot_delay: 180
+    reboot_delay: 240
   tasks:
 #    - name: Wait for target host to settle
 #      ansible.builtin.wait_for:

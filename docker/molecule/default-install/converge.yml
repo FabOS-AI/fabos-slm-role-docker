@@ -57,10 +57,10 @@
     ansible_become_user: ansible
     reboot_delay: 180
   tasks:
-    - name: Wait for target host to settle
-      ansible.builtin.wait_for:
-        timeout: "{{ reboot_delay }}"
-      delegate_to: localhost
+#    - name: Wait for target host to settle
+#      ansible.builtin.wait_for:
+#        timeout: "{{ reboot_delay }}"
+#      delegate_to: localhost
 
     - name: Gathering Facts
       ansible.windows.setup:

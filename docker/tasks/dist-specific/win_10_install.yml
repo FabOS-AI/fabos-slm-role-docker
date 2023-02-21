@@ -15,16 +15,18 @@
   block:
     - name: Enable Windows Features - WSL, Container, Hyper-V
       ansible.windows.win_optional_feature:
-        name: "{{ item }}"
+#        name: "{{ item }}"
+        name: "{{ docker_desktop_windows_features }}"
         state: present
         include_parent: true
-      loop: "{{ docker_desktop_windows_features }}"
+#      loop: "{{ docker_desktop_windows_features }}"
       register: install_win_features
 
     - name: Reboot after activating Windows Features
       when: install_win_features.changed
       ansible.windows.win_reboot:
-        post_reboot_delay: 60
+        post_reboot_delay: "{{ reboot_delay }}"
+
 
 #    - name: "Wait till port {{ ansible_port }} available"
 #      ansible.windows.win_wait_for:
@@ -47,13 +49,18 @@
       changed_when: "'installiert' in wsl_update_cmd.stdout"
       when: "not 'WSL-Version' in wsl_version_cmd.stdout_lines"
 
-- name: Get status of Docker Desktop Service
-  ansible.windows.win_service:
-    name: "Docker Desktop Service"
-  register: docker_desktop_service_info
+    - name: Reboot after WSL update
+      when: wsl_update_cmd.changed
+      ansible.windows.win_reboot:
+        post_reboot_delay: "{{ reboot_delay }}"
+
+#- name: Get status of Docker Desktop Service
+#  ansible.windows.win_service:
+#    name: "Docker Desktop Service"
+#  register: docker_desktop_service_info
 
 - name: Install docker-desktop
-  when: not docker_desktop_service_info.exists
+#  when: not docker_desktop_service_info.exists
   ansible.windows.win_package:
     path: "{{ docker_desktop_download_url }}"
     arguments: install --quiet --accept-license --backend=wsl-2 --admin-settings
@@ -93,11 +100,11 @@
   when: expose_docker_tcp_port
 
 - name: Do reboot
-  when: not docker_desktop_service_info.exists or copy_config_file_cmd.changed | default(false)
+  when: install_docker_desktop.changed or copy_config_file_cmd.changed | default(false)
   block:
     - name: Reboot after Docker Desktop Install / TCP Expose
       ansible.windows.win_reboot:
-        post_reboot_delay: 60
+        post_reboot_delay: "{{ reboot_delay }}"
 
 #    - name: "Wait till port {{ ansible_port }} available"
 #      ansible.windows.win_wait_for:

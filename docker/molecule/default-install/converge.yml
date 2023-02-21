@@ -68,6 +68,8 @@
     ansible_ssh_password: password
     ansible_ssh_common_args: '-o ServerAliveInterval=10'
     ansible_ssh_retries: 10
+    ansible_pipelining: false
+    ansible_ssh_pipelining: false
     ansible_become_user: ansible
     reboot_delay: 240
   tasks:

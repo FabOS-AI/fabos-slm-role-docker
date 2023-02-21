@@ -10,37 +10,30 @@
       ansible.builtin.include_role:
         name: "docker"
 
-- name: Converge - Uninstall (winrm)
-  hosts: winrm
-  gather_facts: yes
-  become: yes
-  vars:
-    ansible_port: 5985
-    ansible_winrm_transport: basic
-    ansible_winrm_read_timeout_sec: 120
-    ansible_winrm_operation_timeout_sec: 90
-    ansible_become_method: runas
-    ansible_become_user: ansible
-    ansible_winrm_server_cert_validation: ignore
-    ansible_psrp_connection_timeout: 120
-    ansible_psrp_operation_timeout: 90
-    ansible_psrp_read_timeout: 120
-    ansible_psrp_reconnection_retries: 10
-    state: absent
-  tasks:
-    - name: Install OpenSSH
-      win_chocolatey:
-        name: openssh
-        package_params: /SSHServerFeature
-        state: present
-
-    - name: set the default shell to PowerShell
-      win_regedit:
-        path: HKLM:\SOFTWARE\OpenSSH
-        name: DefaultShell
-        data: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
-        type: string
-        state: present
+#- name: Converge - Uninstall (winrm)
+#  hosts: winrm
+#  connection: psrp
+#  gather_facts: yes
+#  become: yes
+#  vars:
+#    ansible_connection: psrp
+#    ansible_port: 5986
+#    ansible_winrm_transport: credssp
+#    ansible_winrm_read_timeout_sec: 120
+#    ansible_winrm_operation_timeout_sec: 90
+#    ansible_become_method: runas
+#    ansible_become_user: ansible
+#    ansible_winrm_server_cert_validation: ignore
+#    ansible_psrp_connection_timeout: 30
+#    ansible_psrp_operation_timeout: 60
+#    ansible_psrp_read_timeout: 60
+#    ansible_psrp_reconnection_retries: 10
+#    ansible_psrp_cert_validation: ignore
+#    state: absent
+#  tasks:
+#    - name: "Include docker - state = absent (Windows)"
+#      ansible.builtin.include_role:
+#        name: "docker"
 
 
 - name: Converge - Uninstall (winrm via ssh)
@@ -55,8 +48,16 @@
     ansible_port: 22
     ansible_ssh_user: ansible
     ansible_ssh_password: password
+    ansible_ssh_common_args: '-o ServerAliveInterval=10'
     ansible_become_user: ansible
+    reboot_delay: 180
+    state: absent
   tasks:
+    - name: Wait for target host to settle
+      ansible.builtin.wait_for:
+        timeout: "{{ reboot_delay }}"
+      delegate_to: localhost
+
     - name: "Include docker - state = absent (Windows)"
       ansible.builtin.include_role:
         name: "docker"

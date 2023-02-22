@@ -35,6 +35,19 @@
 #      ansible.builtin.include_role:
 #        name: "docker"
 
+- name: Converge - Wait after create (win-ssh)
+  hosts: winrm
+  connection: local
+  gather_facts: no
+  become: no
+  vars:
+    ansible_connection: local
+    reboot_delay: 240
+  tasks:
+    - name: Wait for target host to settle
+      ansible.builtin.wait_for:
+        timeout: "{{ reboot_delay }}"
+
 
 - name: Converge - Uninstall (winrm via ssh)
   hosts: winrm
@@ -49,15 +62,11 @@
     ansible_ssh_user: ansible
     ansible_ssh_password: password
     ansible_ssh_common_args: '-o ServerAliveInterval=10'
+    ansible_ssh_retries: 10
     ansible_become_user: ansible
-    reboot_delay: 180
+    reboot_delay: 240
     state: absent
   tasks:
-    - name: Wait for target host to settle
-      ansible.builtin.wait_for:
-        timeout: "{{ reboot_delay }}"
-      delegate_to: localhost
-
     - name: "Include docker - state = absent (Windows)"
       ansible.builtin.include_role:
         name: "docker"

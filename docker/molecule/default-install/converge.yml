@@ -78,10 +78,6 @@
         gather_subset:
           - "!all"
 
-#    - set_fact:
-#        ansible_distribution: ''
-#        ansible_os_family: "Windows"
-
     - name: "Include docker - state = present"
       ansible.builtin.include_role:
         name: "docker"

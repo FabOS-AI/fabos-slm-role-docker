@@ -12,6 +12,8 @@ expose_tcp_port:
       dest_file: override.conf
 
 ## Windows
+reboot_delay_default: 240
+
 docker_desktop_download_url: https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe
 docker_desktop_download_dest_folder: C:\Users\ansible\Downloads\
 docker_desktop_download_dest_file: Docker-Desktop-Installer.exe

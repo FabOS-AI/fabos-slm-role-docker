@@ -1,36 +1,16 @@
-#- name: Stop Process 'Docker Desktop'
-#  ansible.windows.win_shell: 'Stop-Process -name "Docker Desktop"'
-#  changed_when:
-#    - stop_process_cmd.stdout_lines | length == 0
-#    - stop_process_cmd.stderr_lines | length == 0
-#  failed_when: false
-#  register: stop_process_cmd
-#
-#- name: Start Docker Desktop
-#  ansible.windows.win_powershell:
-#    script: |
-#      Start-Process -FilePath "C:\Program Files\Docker\Docker\resources\dockerd.exe"
-
 - name: Setup WSL
   block:
     - name: Enable Windows Features - WSL, Container, Hyper-V
       ansible.windows.win_optional_feature:
-#        name: "{{ item }}"
         name: "{{ docker_desktop_windows_features }}"
         state: present
         include_parent: true
-#      loop: "{{ docker_desktop_windows_features }}"
       register: install_win_features
 
     - name: Reboot after activating Windows Features
       when: install_win_features.changed
       ansible.windows.win_reboot:
-        post_reboot_delay: "{{ reboot_delay }}"
-
-
-#    - name: "Wait till port {{ ansible_port }} available"
-#      ansible.windows.win_wait_for:
-#        port: "{{ ansible_port }}"
+        post_reboot_delay: "{{ reboot_delay | default(reboot_delay_default) }}"
 
     - name: Get Version of wsl
       ansible.windows.win_command:
@@ -52,7 +32,7 @@
     - name: Reboot after WSL update
       when: wsl_update_cmd.changed
       ansible.windows.win_reboot:
-        post_reboot_delay: "{{ reboot_delay }}"
+        post_reboot_delay: "{{ reboot_delay | default(reboot_delay_default) }}"
 
 #- name: Get status of Docker Desktop Service
 #  ansible.windows.win_service:
@@ -69,26 +49,6 @@
 #  poll: 0
   register: install_docker_desktop
 
-#- name: Wait till Installer is finished
-#  when: not docker_desktop_service_info.exists
-#  block:
-#    - name: Wait for Docker Desktop Installer to start
-#      community.windows.win_wait_for_process:
-#        process_name_exact: "Docker%20Desktop%20Installer"
-#        state: present
-#        timeout: 600
-#
-#    - name: Wait for Docker Desktop Installer to finish
-#      community.windows.win_wait_for_process:
-#        process_name_exact: "Docker%20Desktop%20Installer"
-#        state: absent
-#        timeout: 600
-#
-#    - name: Cleanup Ansible Async Job
-#      ansible.builtin.async_status:
-#        jid: '{{ install_docker_desktop.ansible_job_id }}'
-#        mode: cleanup
-
 - name: Add user to group 'docker-users'
   ansible.windows.win_user:
     name: "{{ ansible_user }}"
@@ -104,11 +64,7 @@
   block:
     - name: Reboot after Docker Desktop Install / TCP Expose
       ansible.windows.win_reboot:
-        post_reboot_delay: "{{ reboot_delay }}"
-
-#    - name: "Wait till port {{ ansible_port }} available"
-#      ansible.windows.win_wait_for:
-#        port: "{{ ansible_port }}"
+        post_reboot_delay: "{{ reboot_delay | default(reboot_delay_default) }}"
 
 #- name: (Re)Start Docker Desktop
 #  when:

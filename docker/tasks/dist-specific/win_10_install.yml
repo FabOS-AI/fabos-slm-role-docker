@@ -57,7 +57,7 @@
 
 - name: Expose TCP Port
   ansible.builtin.include_tasks: helper/add_config_for_expose_tcp_port_win.yml
-  when: expose_docker_tcp_port
+  when: expose_docker_tcp_port | default(expose_docker_tcp_port_default)
 
 - name: Do reboot
   when: install_docker_desktop.changed or copy_config_file_cmd.changed | default(false)

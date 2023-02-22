@@ -1,7 +1,7 @@
 ---
 # defaults file for docker
 state: present
-expose_docker_tcp_port: false
+expose_docker_tcp_port_default: false
 expose_tcp_port:
   files:
     - src: daemon.json

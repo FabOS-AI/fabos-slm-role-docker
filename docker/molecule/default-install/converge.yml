@@ -71,14 +71,6 @@
     ansible_become_method: runas
     reboot_delay: 240
   tasks:
-    - name: Disable Realtime Protection, Cloud-delivered Protection
-      ansible.windows.win_powershell:
-        script: "{{ item }}"
-      loop:
-        - Set-MpPreference -DisableRealtimeMonitoring $true
-        - Set-MpPreference -MAPSReporting Disabled
-
-
     - name: Gathering Facts
       ansible.windows.setup:
         gather_subset:

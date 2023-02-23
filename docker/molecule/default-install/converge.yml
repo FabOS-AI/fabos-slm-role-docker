@@ -71,6 +71,27 @@
     ansible_become_method: runas
     reboot_delay: 300
   tasks:
+    - name: Disable Windows Update, AntiSpyware, Smart Screen
+      ansible.windows.win_regedit:
+        path: "{{ item.path }}"
+        name: "{{ item.name }}"
+        data: "{{ item.data }}"
+        type: "{{ item.type }}"
+      loop:
+        - path: 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer'
+          name: NoWindowsUpdate
+          data: 1
+          type: dword
+        - path: 'HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender'
+          name: DisableAntiSpyware
+          data: 1
+          type: dword
+        - path: 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
+          name: EnableSmartScreen
+          data: 0
+          type: dword
+
+
     - name: Gathering Facts
       ansible.windows.setup:
         gather_subset:

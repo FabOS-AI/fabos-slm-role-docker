@@ -48,7 +48,7 @@
   become: no
   vars:
     ansible_connection: local
-    reboot_delay: 300
+    reboot_delay: 60
   tasks:
     - name: Wait for target host to settle
       ansible.builtin.wait_for:
@@ -69,8 +69,16 @@
     ansible_ssh_retries: 10
     ansible_become_user: ansible
     ansible_become_method: runas
-    reboot_delay: 240
+    reboot_delay: 120
   tasks:
+    - name: Disable Realtime Protection, Cloud-delivered Protection
+      ansible.windows.win_powershell:
+        script: "{{ item }}"
+      loop:
+        - Set-MpPreference -DisableRealtimeMonitoring $true
+        - Set-MpPreference -MAPSReporting Disabled
+
+
     - name: Gathering Facts
       ansible.windows.setup:
         gather_subset:

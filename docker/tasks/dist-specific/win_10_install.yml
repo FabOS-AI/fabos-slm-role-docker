@@ -34,19 +34,11 @@
       ansible.windows.win_reboot:
         post_reboot_delay: "{{ reboot_delay | default(reboot_delay_default) }}"
 
-#- name: Get status of Docker Desktop Service
-#  ansible.windows.win_service:
-#    name: "Docker Desktop Service"
-#  register: docker_desktop_service_info
-
 - name: Install docker-desktop
-#  when: not docker_desktop_service_info.exists
   ansible.windows.win_package:
     path: "{{ docker_desktop_download_url }}"
     arguments: install --quiet --accept-license --backend=wsl-2 --admin-settings
     product_id: "{{ docker_desktop_product_id }}"
-#  async: 600
-#  poll: 0
   register: install_docker_desktop
 
 - name: Add user to group 'docker-users'
@@ -65,24 +57,6 @@
     - name: Reboot after Docker Desktop Install / TCP Expose
       ansible.windows.win_reboot:
         post_reboot_delay: "{{ reboot_delay | default(reboot_delay_default) }}"
-
-#- name: (Re)Start Docker Desktop
-#  when:
-#    - not install_docker_desktop.changed
-#    - copy_config_file_cmd.changed | default(false)
-#  block:
-#  - name: Stop Process 'Docker Desktop'
-#    ansible.windows.win_shell: 'Stop-Process -name "Docker Desktop"'
-#    changed_when:
-#      - stop_process_cmd.stdout_lines | length == 0
-#      - stop_process_cmd.stderr_lines | length == 0
-#    failed_when: false
-#    register: stop_process_cmd
-#
-#  - name: Start Docker Desktop
-#    ansible.windows.win_powershell:
-#      script: |
-#        Start-Process -FilePath "C:\Program Files\Docker\Docker\Docker Desktop.exe"
 
 - name: Wait till Docker Desktop is available
   ansible.windows.win_command: docker ps

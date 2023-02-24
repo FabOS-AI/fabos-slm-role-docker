@@ -1,27 +1,17 @@
-#- name: Uninstall Docker-Desktop via chocolatey
-#  chocolatey.chocolatey.win_chocolatey:
-#    name: "docker-desktop"
-#    state: absent
-#    remove_dependencies: true
+- name: Get Status of Docker Engine Service
+  ansible.windows.win_service:
+    name: docker
+  register: docker_service_state
 
-#- name: Checking if Docker Windows Service is already configured
-#  ansible.windows.win_service:
-#    name: "{{ docker_desktop_service_name }}"
-#  register: docker_service_info
-#  ignore_errors: yes
-#
-#- name: Uninstall Docker-Desktop
-#  when: docker_service_info.exists
-#  block:
-#  - name: Download Docker-Desktop Setup exe
-#    ansible.windows.win_get_url:
-#      url: "{{ docker_desktop_download_url }}"
-#      dest: "{{ docker_desktop_download_dest_full_path }}"
-#
-#  - name: Run Docker-Desktop Setup Uninstall
-#    ansible.windows.win_command: "{{ docker_desktop_download_dest_file }} uninstall --quiet"
-#    args:
-#      chdir: "{{ docker_desktop_download_dest_folder }}"
+- name: Unregister Docker Engine Service
+  ansible.windows.win_command:
+    cmd: '"C:\Program Files\Docker\Docker\resources\dockerd.exe" --unregister-service'
+  when: docker_service_state.exists
+  register: unregister_docker_service_cmd
+  changed_when: unregister_docker_service_cmd.rc == 0
+  failed_when:
+    - unregister_docker_service_cmd.rc == 1
+    - "not 'zum Löschen markiert' in unregister_docker_service_cmd.stdout"
 
 - name: Uninstall docker-desktop
   ansible.windows.win_package:
@@ -29,4 +19,5 @@
     arguments: uninstall --quiet
     product_id: "{{ docker_desktop_product_id }}"
     state: absent
-  timeout: 900
+  timeout: 300
+  retries: 5

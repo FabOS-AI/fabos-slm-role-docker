@@ -41,19 +41,6 @@
 #      ansible.builtin.include_role:
 #        name: "docker"
 
-- name: Converge - Wait after create (win-ssh)
-  hosts: winrm
-  connection: local
-  gather_facts: no
-  become: no
-  vars:
-    ansible_connection: local
-    reboot_delay: 60
-  tasks:
-    - name: Wait for target host to settle
-      ansible.builtin.wait_for:
-        timeout: "{{ reboot_delay }}"
-
 - name: Converge - Install (win-ssh)
   hosts: winrm
   connection: ssh
@@ -68,34 +55,17 @@
     ansible_ssh_common_args: '-o ServerAliveInterval=10'
     ansible_ssh_retries: 10
     ansible_become_user: ansible
+    ansible_become_password: password
     ansible_become_method: runas
     reboot_delay: 300
   tasks:
-    - name: Disable Windows Update, AntiSpyware, Smart Screen
-      ansible.windows.win_regedit:
-        path: "{{ item.path }}"
-        name: "{{ item.name }}"
-        data: "{{ item.data }}"
-        type: "{{ item.type }}"
-      loop:
-        - path: 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer'
-          name: NoWindowsUpdate
-          data: 1
-          type: dword
-        - path: 'HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender'
-          name: DisableAntiSpyware
-          data: 1
-          type: dword
-        - path: 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
-          name: EnableSmartScreen
-          data: 0
-          type: dword
-
-
     - name: Gathering Facts
       ansible.windows.setup:
         gather_subset:
           - "!all"
+      async: 30
+      poll: 5
+      retries: 3
 
     - name: "Include docker - state = present"
       ansible.builtin.include_role:

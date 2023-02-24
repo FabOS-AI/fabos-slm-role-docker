@@ -1,0 +1,9 @@
+- name: Converge - Wait after create
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  become: no
+  tasks:
+    - name: Wait for target host to settle
+      ansible.builtin.wait_for:
+        timeout: 120

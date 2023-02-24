@@ -5,12 +5,18 @@
         name: "{{ docker_desktop_windows_features }}"
         state: present
         include_parent: true
+      async: 60
+      poll: 5
       register: install_win_features
 
     - name: Reboot after activating Windows Features
       when: install_win_features.changed
       ansible.windows.win_reboot:
-        post_reboot_delay: "{{ reboot_delay | default(reboot_delay_default) }}"
+        reboot_timeout: 180
+        post_reboot_delay: 90
+      # Funktioniert async bei Reboot?
+#      timeout: 180
+#      poll: 5
 
     - name: Get Version of wsl
       ansible.windows.win_command:
@@ -18,6 +24,8 @@
         output_encoding_override: utf-16
       changed_when: false
       failed_when: false
+      async: 15
+      poll: 5
       register: wsl_version_cmd
 
     - name: Update wsl
@@ -25,14 +33,19 @@
         cmd: wsl --update
         output_encoding_override: utf-16
       register: wsl_update_cmd
-      ignore_errors: true
-      changed_when: "'installiert' in wsl_update_cmd.stdout"
       when: "not 'WSL-Version' in wsl_version_cmd.stdout_lines"
+      async: 90
+      poll: 0
+      changed_when: false
+      failed_when: false
+#      changed_when: "'installiert' in wsl_update_cmd.stdout"
+#      failed_when: "not 'Das System kann auf die Datei nicht zugreifen' in wsl_update_cmd.stderr"
 
-    - name: Reboot after WSL update
-      when: wsl_update_cmd.changed
-      ansible.windows.win_reboot:
-        post_reboot_delay: "{{ reboot_delay | default(reboot_delay_default) }}"
+
+#    - name: Reboot after WSL update
+#      when: wsl_update_cmd.changed
+#      ansible.windows.win_reboot:
+#        post_reboot_delay: "{{ reboot_delay | default(reboot_delay_default) }}"
 
 - name: Install docker-desktop
   ansible.windows.win_package:
@@ -40,6 +53,10 @@
     arguments: install --quiet --accept-license --backend=wsl-2 --admin-settings
     product_id: "{{ docker_desktop_product_id }}"
   register: install_docker_desktop
+  timeout: 300
+  retries: 5
+#  async: 180
+#  poll: 10
 
 - name: Add user to group 'docker-users'
   ansible.windows.win_user:
@@ -51,12 +68,11 @@
   ansible.builtin.include_tasks: helper/add_config_for_expose_tcp_port_win.yml
   when: expose_docker_tcp_port | default(expose_docker_tcp_port_default)
 
-- name: Do reboot
+- name: Reboot after Docker Desktop Install / TCP Expose
   when: install_docker_desktop.changed or copy_config_file_cmd.changed | default(false)
-  block:
-    - name: Reboot after Docker Desktop Install / TCP Expose
-      ansible.windows.win_reboot:
-        post_reboot_delay: "{{ reboot_delay | default(reboot_delay_default) }}"
+  ansible.windows.win_reboot:
+    reboot_timeout: 180
+    post_reboot_delay: 90
 
 - name: Wait till Docker Desktop is available
   ansible.windows.win_command: docker ps
@@ -66,16 +82,36 @@
   delay: 2
   changed_when: false
 
-- name: Set Container Type
-  block:
-  - name: Get Container Type (Linux / Windows)
-    ansible.windows.win_command:
-      cmd: "docker info --format {%raw%}{{.OSType}}{%endraw%}"
-    register: docker_info_os_type
-    failed_when: false
-    changed_when: false
+- name: Get Container Type (Linux / Windows)
+  ansible.windows.win_command:
+    cmd: "docker info --format {%raw%}{{.OSType}}{%endraw%}"
+  register: docker_info_os_type
+  failed_when: false
+  changed_when: false
 
-  - name: Switch to Windows Containers
-    when: "'windows' not in docker_info_os_type.stdout_lines"
-    ansible.windows.win_command:
-      cmd: '"C:\\Program Files\\Docker\\Docker\\DockerCli.exe" -SwitchWindowsEngine'
+- name: Switch to Windows Containers
+  when: "'windows' not in docker_info_os_type.stdout_lines"
+  ansible.windows.win_command:
+    cmd: '"C:\\Program Files\\Docker\\Docker\\DockerCli.exe" -SwitchWindowsEngine'
+
+- name: Register and Start Docker Engine Service
+  block:
+    - name: Get Status of Docker Engine Service
+      ansible.windows.win_service:
+        name: docker
+      register: docker_service_state
+
+    - name: Register Docker Engine Service
+      ansible.windows.win_command:
+        cmd: '"C:\Program Files\Docker\Docker\resources\dockerd.exe" --register-service'
+      when: not docker_service_state.exists
+      register: register_docker_service_cmd
+      changed_when: register_docker_service_cmd.rc == 0
+      failed_when:
+        - "not 'Der angegebene Dienst ist bereits vorhanden' in register_docker_service_cmd.stdout"
+        - register_docker_service_cmd.rc != 0
+
+    - name: Start Docker Engine Service
+      ansible.windows.win_service:
+        name: docker
+        state: started

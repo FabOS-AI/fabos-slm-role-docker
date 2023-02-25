@@ -1,3 +1,0 @@
-- import_playbook: ../default-install/converge.yml
-
-- import_playbook: ../default-install/prepare-win.yml

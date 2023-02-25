@@ -10,47 +10,11 @@
       ansible.builtin.include_role:
         name: "docker"
 
-#- name: Converge - Uninstall (winrm)
-#  hosts: winrm
-#  connection: psrp
-#  gather_facts: yes
-#  become: yes
-#  vars:
-#    ansible_connection: psrp
-#    ansible_port: 5986
-#    ansible_winrm_transport: credssp
-#    ansible_winrm_read_timeout_sec: 120
-#    ansible_winrm_operation_timeout_sec: 90
-#    ansible_become_method: runas
-#    ansible_become_user: ansible
-#    ansible_winrm_server_cert_validation: ignore
-#    ansible_psrp_connection_timeout: 30
-#    ansible_psrp_operation_timeout: 60
-#    ansible_psrp_read_timeout: 60
-#    ansible_psrp_reconnection_retries: 10
-#    ansible_psrp_cert_validation: ignore
-#    state: absent
-#  tasks:
-#    - name: "Include docker - state = absent (Windows)"
-#      ansible.builtin.include_role:
-#        name: "docker"
-
-- name: Converge - Uninstall (winrm via ssh)
-  hosts: winrm
-  connection: ssh
+- name: Converge - Uninstall (winrm/win-ssh)
+  hosts: winrm:win-ssh
   gather_facts: no
   become: yes
   vars:
-    ansible_connection: ssh
-    ansible_shell_type: powershell
-    ansible_become_method: runas
-    ansible_port: 22
-    ansible_ssh_user: ansible
-    ansible_ssh_password: password
-    ansible_ssh_common_args: '-o ServerAliveInterval=10'
-    ansible_ssh_retries: 10
-    ansible_become_user: ansible
-    ansible_become_password: password
     state: absent
   tasks:
     - name: Gathering Facts
@@ -61,6 +25,6 @@
       poll: 5
       retries: 3
 
-    - name: "Include docker - state = absent (Windows)"
+    - name: "Include docker - state = present"
       ansible.builtin.include_role:
         name: "docker"

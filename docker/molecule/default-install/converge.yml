@@ -8,56 +8,10 @@
       ansible.builtin.include_role:
         name: "docker"
 
-#- name: Converge - Install (winrm)
-#  hosts: winrm
-#  connection: psrp
-#  gather_facts: yes
-#  become: yes
-#  vars:
-#    ansible_connection: psrp
-#    ansible_port: 5986
-#    ansible_winrm_transport: credssp
-#    ansible_winrm_read_timeout_sec: 120
-#    ansible_winrm_operation_timeout_sec: 90
-#    ansible_become_method: runas
-#    ansible_become_user: ansible
-#    ansible_winrm_server_cert_validation: ignore
-#    ansible_psrp_connection_timeout: 30
-#    ansible_psrp_operation_timeout: 60
-#    ansible_psrp_read_timeout: 90
-#    ansible_psrp_reconnection_retries: 2
-#    ansible_psrp_cert_validation: ignore
-#  tasks:
-##    - name: Pause 15 seconds
-##      ansible.windows.win_wait_for:
-##        timeout: 15
-##
-##    - name: Gathering Facts
-##      ansible.windows.setup:
-##        gather_subset:
-##          - "!all"
-##
-#    - name: "Include docker - state = present"
-#      ansible.builtin.include_role:
-#        name: "docker"
-
-- name: Converge - Install (win-ssh)
-  hosts: winrm
-  connection: ssh
+- name: Converge - Install (winrm/win-ssh)
+  hosts: winrm:win-ssh
   gather_facts: no
   become: yes
-  vars:
-    ansible_connection: ssh
-    ansible_shell_type: powershell
-    ansible_port: 22
-    ansible_ssh_user: ansible
-    ansible_ssh_password: password
-    ansible_ssh_common_args: '-o ServerAliveInterval=10'
-    ansible_ssh_retries: 10
-    ansible_become_user: ansible
-    ansible_become_password: password
-    ansible_become_method: runas
-    reboot_delay: 300
   tasks:
     - name: Gathering Facts
       ansible.windows.setup:

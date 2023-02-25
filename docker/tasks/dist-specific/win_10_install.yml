@@ -14,9 +14,6 @@
       ansible.windows.win_reboot:
         reboot_timeout: 180
         post_reboot_delay: 90
-      # Funktioniert async bei Reboot?
-#      timeout: 180
-#      poll: 5
 
     - name: Get Version of wsl
       ansible.windows.win_command:
@@ -40,12 +37,6 @@
       failed_when: false
 #      changed_when: "'installiert' in wsl_update_cmd.stdout"
 #      failed_when: "not 'Das System kann auf die Datei nicht zugreifen' in wsl_update_cmd.stderr"
-
-
-#    - name: Reboot after WSL update
-#      when: wsl_update_cmd.changed
-#      ansible.windows.win_reboot:
-#        post_reboot_delay: "{{ reboot_delay | default(reboot_delay_default) }}"
 
 - name: Install docker-desktop
   ansible.windows.win_package:

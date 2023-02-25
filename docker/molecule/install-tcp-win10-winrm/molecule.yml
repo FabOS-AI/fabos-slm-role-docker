@@ -28,13 +28,13 @@ provisioner:
         ansible_connection: psrp
         ansible_port: 5986
         ansible_winrm_transport: credssp
-        ansible_winrm_read_timeout_sec: 360
+        ansible_winrm_read_timeout_sec: 600
         ansible_winrm_operation_timeout_sec: 120
         ansible_winrm_server_cert_validation: ignore
         ansible_psrp_port: 5986
         ansible_psrp_connection_timeout: 30
         ansible_psrp_operation_timeout: 120
-        ansible_psrp_read_timeout: 360
+        ansible_psrp_read_timeout: 600
         ansible_psrp_reconnection_retries: 2
         ansible_psrp_cert_validation: ignore
         ansible_psrp_reconnection_retries: 10

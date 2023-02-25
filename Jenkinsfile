@@ -30,9 +30,9 @@ def scenarios = [
         "uninstall-win10"
     ],
     "win10-ssh": [
-            "install-win10",
-            "install-tcp-win10",
-            "uninstall-win10"
+        "install-win10",
+        "install-tcp-win10",
+        "uninstall-win10"
     ]
 ]
 

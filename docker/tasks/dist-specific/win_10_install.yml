@@ -47,7 +47,7 @@
     product_id: "{{ docker_desktop_product_id }}"
   ignore_errors: true
   register: install_docker_desktop
-  timeout: 360
+  timeout: 600
   retries: 5
 #  async: 180
 #  poll: 10

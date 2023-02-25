@@ -30,7 +30,9 @@
         cmd: wsl --update
         output_encoding_override: utf-16
       register: wsl_update_cmd
-      when: "not 'WSL-Version' in wsl_version_cmd.stdout_lines"
+      when:
+        - "not 'WSL-Version' in wsl_version_cmd.stdout_lines"
+        - "not 'Das System kann auf die Datei nicht zugreifen' in wsl_version_cmd.stderr"
       async: 90
       poll: 0
       changed_when: false
@@ -43,11 +45,21 @@
     path: "{{ docker_desktop_download_url }}"
     arguments: install --quiet --accept-license --backend=wsl-2 --admin-settings
     product_id: "{{ docker_desktop_product_id }}"
+  ignore_errors: true
   register: install_docker_desktop
-  timeout: 300
+  timeout: 360
   retries: 5
 #  async: 180
 #  poll: 10
+
+- name: Wait for wsl update to finish
+  async_status:
+    jid: "{{ wsl_update_cmd.ansible_job_id }}"
+  register: job_result
+  when: wsl_update_cmd.ansible_job_id is defined
+  until: job_result.finished
+  retries: 20
+  delay: 2
 
 - name: Add user to group 'docker-users'
   ansible.windows.win_user:
@@ -60,7 +72,7 @@
   when: expose_docker_tcp_port | default(expose_docker_tcp_port_default)
 
 - name: Reboot after Docker Desktop Install / TCP Expose
-  when: install_docker_desktop.changed or copy_config_file_cmd.changed | default(false)
+  when: install_docker_desktop.changed or (install_docker_desktop.status_code == 200 and not install_docker_desktop.msg == "OK") or copy_config_file_cmd.changed | default(false)
   ansible.windows.win_reboot:
     reboot_timeout: 180
     post_reboot_delay: 90

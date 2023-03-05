@@ -5,7 +5,7 @@
         name: "{{ docker_desktop_windows_features }}"
         state: present
         include_parent: true
-      async: 60
+      async: 120
       poll: 5
       register: install_win_features
 

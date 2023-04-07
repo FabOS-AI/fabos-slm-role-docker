@@ -105,8 +105,7 @@
       register: docker_service_state
 
     - name: Register Docker Engine Service
-      ansible.windows.win_command:
-        cmd: '"C:\Program Files\Docker\Docker\resources\dockerd.exe" --register-service'
+      ansible.windows.win_command: '"C:\Program Files\Docker\Docker\resources\dockerd.exe" --register-service'
       when: not docker_service_state.exists
       register: register_docker_service_cmd
       changed_when: register_docker_service_cmd.rc == 0

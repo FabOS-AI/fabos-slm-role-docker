@@ -4,8 +4,7 @@
   register: docker_service_state
 
 - name: Unregister Docker Engine Service
-  ansible.windows.win_command:
-    cmd: '"C:\Program Files\Docker\Docker\resources\dockerd.exe" --unregister-service'
+  ansible.windows.win_command: '"C:\Program Files\Docker\Docker\resources\dockerd.exe" --unregister-service'
   when: docker_service_state.exists
   register: unregister_docker_service_cmd
   changed_when: unregister_docker_service_cmd.rc == 0

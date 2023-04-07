@@ -53,7 +53,7 @@
 #  poll: 10
 
 - name: Wait for wsl update to finish
-  async_status:
+  ansible.windows.async_status:
     jid: "{{ wsl_update_cmd.ansible_job_id }}"
   register: job_result
   when: wsl_update_cmd.ansible_job_id is defined

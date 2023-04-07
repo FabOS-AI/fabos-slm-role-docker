@@ -95,8 +95,7 @@
 
 - name: Switch to Windows Containers
   when: "'windows' not in docker_info_os_type.stdout_lines"
-  ansible.windows.win_command:
-    cmd: '"C:\\Program Files\\Docker\\Docker\\DockerCli.exe" -SwitchWindowsEngine'
+  ansible.windows.win_command: '"C:\\Program Files\\Docker\\Docker\\DockerCli.exe" -SwitchWindowsEngine'
 
 - name: Register and Start Docker Engine Service
   block:

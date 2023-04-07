@@ -56,7 +56,9 @@
   ansible.windows.async_status:
     jid: "{{ wsl_update_cmd.ansible_job_id }}"
   register: job_result
-  when: wsl_update_cmd.ansible_job_id is defined
+  when:
+    - wsl_update_cmd.changed
+    - wsl_update_cmd.ansible_job_id is defined
   until: job_result.finished
   retries: 20
   delay: 2
